@@ -22,7 +22,7 @@ export default function DashboardPage() {
     // Fetch dashboard data
     const fetchDashboard = async () => {
       try {
-        const response = await fetch('http://127.0.0.1:8000/api/v1/admin/dashboard');
+        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/admin/dashboard`);
         const result = await response.json();
         setData(result);
       } catch (err) {

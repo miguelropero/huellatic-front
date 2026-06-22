@@ -33,19 +33,19 @@ export default function RegistroEmpleadoPage() {
     const fetchData = async () => {
       try {
         // Fetch Empresa
-        const resEmpresa = await fetch(`http://127.0.0.1:8000/api/v1/public/empresa/${token}`);
+        const resEmpresa = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/public/empresa/${token}`);
         if (!resEmpresa.ok) throw new Error('El enlace es inválido o ha expirado.');
         const dataEmpresa = await resEmpresa.json();
         setEmpresaNombre(dataEmpresa.nombre);
 
         // Fetch Ciudades
-        const resCiudades = await fetch('http://127.0.0.1:8000/api/v1/public/ciudades');
+        const resCiudades = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/public/ciudades`);
         if (resCiudades.ok) {
           setCiudades(await resCiudades.json());
         }
 
         // Fetch Cuestionario
-        const resCuestionario = await fetch(`http://127.0.0.1:8000/api/v1/public/cuestionario`);
+        const resCuestionario = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/public/cuestionario`);
         if (!resCuestionario.ok) throw new Error('Error al cargar el cuestionario.');
         const dataCuestionario = await resCuestionario.json();
         setSecciones(dataCuestionario);
@@ -156,7 +156,7 @@ export default function RegistroEmpleadoPage() {
         respuestas: respuestas
       };
 
-      const response = await fetch(`http://127.0.0.1:8000/api/v1/public/registro/${token}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/public/registro/${token}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -199,7 +199,7 @@ export default function RegistroEmpleadoPage() {
 
   const handleDownloadPDF = async () => {
     try {
-      const res = await fetch(`http://127.0.0.1:8000/api/v1/public/empleado/${empleadoId}/reporte-pdf`);
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/public/empleado/${empleadoId}/reporte-pdf`);
       if (!res.ok) throw new Error('Error al generar PDF');
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);

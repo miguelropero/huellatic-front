@@ -61,23 +61,23 @@ export default function ConfiguracionPage() {
 
     try {
       if (tab === 'preguntas' || tab === 'secciones') {
-        const res = await fetch('http://127.0.0.1:8000/api/v1/admin/cuestionario');
+        const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/admin/cuestionario`);
         if (!res.ok) throw new Error('Error al cargar cuestionario');
         setSecciones(await res.json());
       } else if (tab === 'sectores') {
-        const res = await fetch('http://127.0.0.1:8000/api/v1/admin/sectores');
+        const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/admin/sectores`);
         if (!res.ok) throw new Error('Error al cargar sectores');
         setSectores(await res.json());
       } else if (tab === 'ciudades') {
         const [resC, resD] = await Promise.all([
-          fetch('http://127.0.0.1:8000/api/v1/admin/ciudades'),
-          fetch('http://127.0.0.1:8000/api/v1/public/departamentos')
+          fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/admin/ciudades`),
+          fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/public/departamentos`)
         ]);
         if (!resC.ok || !resD.ok) throw new Error('Error al cargar ciudades/departamentos');
         setCiudades(await resC.json());
         setDepartamentos(await resD.json());
       } else if (tab === 'variables') {
-        const res = await fetch('http://127.0.0.1:8000/api/v1/admin/variables');
+        const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/admin/variables`);
         if (!res.ok) throw new Error('Error al cargar variables');
         setVariables(await res.json());
       }
@@ -121,7 +121,7 @@ export default function ConfiguracionPage() {
 
   const savePregunta = async (preguntaId) => {
     try {
-      const res = await fetch(`http://127.0.0.1:8000/api/v1/admin/cuestionario/preguntas/${preguntaId}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/admin/cuestionario/preguntas/${preguntaId}`, {
         method: 'PUT',
         headers: { 
           'Content-Type': 'application/json',
@@ -150,8 +150,8 @@ export default function ConfiguracionPage() {
     e.preventDefault();
     try {
       const url = editingSectorId 
-        ? `http://127.0.0.1:8000/api/v1/admin/sectores/${editingSectorId}`
-        : 'http://127.0.0.1:8000/api/v1/admin/sectores';
+        ? `${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/admin/sectores/${editingSectorId}`
+        : `${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/admin/sectores`;
         
       const method = editingSectorId ? 'PUT' : 'POST';
       
@@ -173,7 +173,7 @@ export default function ConfiguracionPage() {
 
   const saveSeccion = async (id) => {
     try {
-      const res = await fetch(`http://127.0.0.1:8000/api/v1/admin/cuestionario/secciones/${id}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/admin/cuestionario/secciones/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(seccionForm)
@@ -191,7 +191,7 @@ export default function ConfiguracionPage() {
     
     setSyncing(true);
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/v1/admin/sincronizar-divipola', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/admin/sincronizar-divipola`, {
         method: 'POST',
         headers: { 
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -212,7 +212,7 @@ export default function ConfiguracionPage() {
   const deleteSector = async (id) => {
     if (!window.confirm("¿Seguro que deseas eliminar este sector?")) return;
     try {
-      const res = await fetch(`http://127.0.0.1:8000/api/v1/admin/sectores/${id}`, { method: 'DELETE' });
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/admin/sectores/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Error al eliminar');
       fetchDataForTab('sectores', true);
     } catch(err) {

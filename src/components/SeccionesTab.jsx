@@ -82,7 +82,7 @@ export default function SeccionesTab({ secciones, setSecciones, fetchDataForTab,
 
   const saveSeccion = async (id) => {
     try {
-      const res = await fetch(`http://127.0.0.1:8000/api/v1/admin/cuestionario/secciones/${id}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/admin/cuestionario/secciones/${id}`, {
         method: 'PUT',
         headers: { 
           'Content-Type': 'application/json',
@@ -123,7 +123,7 @@ export default function SeccionesTab({ secciones, setSecciones, fetchDataForTab,
     const payload = updatedSecciones.map(s => ({ seccion_id: s.id, orden: s.orden }));
 
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/v1/admin/cuestionario/secciones/reordenar', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/admin/cuestionario/secciones/reordenar`, {
         method: 'PUT',
         headers: { 
           'Content-Type': 'application/json',

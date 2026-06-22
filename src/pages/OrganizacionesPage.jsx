@@ -26,8 +26,8 @@ export default function OrganizacionesPage() {
       try {
         setLoading(true);
         const url = activeSearch 
-          ? `http://127.0.0.1:8000/api/v1/admin/empresas?q=${encodeURIComponent(activeSearch)}`
-          : 'http://127.0.0.1:8000/api/v1/admin/empresas';
+          ? `${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/admin/empresas?q=${encodeURIComponent(activeSearch)}`
+          : `${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/admin/empresas`;
           
         const response = await fetch(url);
         if (!response.ok) throw new Error('Error al obtener organizaciones');
@@ -43,8 +43,8 @@ export default function OrganizacionesPage() {
   const fetchParametricas = async () => {
     try {
       const [resSectores, resCiudades] = await Promise.all([
-        fetch('http://127.0.0.1:8000/api/v1/public/sectores'),
-        fetch('http://127.0.0.1:8000/api/v1/public/ciudades')
+        fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/public/sectores`),
+        fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/public/ciudades`)
       ]);
       if (resSectores.ok) setSectores(await resSectores.json());
       if (resCiudades.ok) setCiudades(await resCiudades.json());
@@ -93,7 +93,7 @@ export default function OrganizacionesPage() {
 
     try {
       setSubmitting(true);
-      const response = await fetch('http://127.0.0.1:8000/api/v1/admin/empresas', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/admin/empresas`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

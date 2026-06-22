@@ -18,13 +18,13 @@ export default function EmpresaDetallePage() {
     const fetchEmpresaDetalle = async () => {
       try {
         // Fetch empresa info
-        const resEmpresa = await fetch(`http://127.0.0.1:8000/api/v1/admin/empresas/${id}`);
+        const resEmpresa = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/admin/empresas/${id}`);
         if (!resEmpresa.ok) throw new Error('Empresa no encontrada');
         const dataEmpresa = await resEmpresa.json();
         setEmpresa(dataEmpresa);
 
         // Fetch empleados de la empresa
-        const resEmpleados = await fetch(`http://127.0.0.1:8000/api/v1/admin/empresas/${id}/empleados`);
+        const resEmpleados = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/admin/empresas/${id}/empleados`);
         if (resEmpleados.ok) {
           const dataEmpleados = await resEmpleados.json();
           setEmpleados(dataEmpleados);
@@ -64,6 +64,24 @@ export default function EmpresaDetallePage() {
 
   const encuestasCompletadas = empleados.filter(e => e.fecha_respuesta).length;
   const showReportButton = empleados.length > 0 && encuestasCompletadas > 0;
+
+  const handleDownloadPDF = async (empleadoId, cedula) => {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/public/empleado/${empleadoId}/reporte-pdf`);
+      if (!res.ok) throw new Error('Error al generar PDF');
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Reporte_Huella_${cedula}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      a.remove();
+    } catch (err) {
+      alert("Hubo un error al descargar el reporte: " + err.message);
+    }
+  };
 
   return (
     <div className={styles.pageContainer}>
@@ -164,12 +182,13 @@ export default function EmpresaDetallePage() {
                     <th style={{ padding: '0.5rem', color: 'var(--text-muted)', fontSize: '0.85rem' }}>Cargo</th>
                     <th style={{ padding: '0.5rem', color: 'var(--text-muted)', fontSize: '0.85rem' }}>Cédula</th>
                     <th style={{ padding: '0.5rem', color: 'var(--text-muted)', fontSize: '0.85rem' }}>Encuesta</th>
+                    <th style={{ padding: '0.5rem', color: 'var(--text-muted)', fontSize: '0.85rem' }}>Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
                   {empleadosFiltrados.length === 0 ? (
                     <tr>
-                      <td colSpan="4" style={{ padding: '1rem', textAlign: 'center', color: 'var(--text-muted)' }}>No se encontraron empleados que coincidan con la búsqueda.</td>
+                      <td colSpan="5" style={{ padding: '1rem', textAlign: 'center', color: 'var(--text-muted)' }}>No se encontraron empleados que coincidan con la búsqueda.</td>
                     </tr>
                   ) : (
                     (showAllEmpleados ? empleadosFiltrados : empleadosFiltrados.slice(0, 10)).map(emp => (
@@ -182,6 +201,19 @@ export default function EmpresaDetallePage() {
                             <span style={{ color: 'green', background: '#dcfce7', padding: '0.2rem 0.5rem', borderRadius: '1rem', fontSize: '0.75rem' }}>Completada</span>
                           ) : (
                             <span style={{ color: '#f59e0b', background: '#fef3c7', padding: '0.2rem 0.5rem', borderRadius: '1rem', fontSize: '0.75rem' }}>Pendiente</span>
+                          )}
+                        </td>
+                        <td style={{ padding: '0.75rem 0.5rem', fontSize: '0.9rem' }}>
+                          {emp.fecha_respuesta && (
+                            <button 
+                              onClick={() => handleDownloadPDF(emp.id, emp.cedula)}
+                              style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', padding: '0.4rem 0.6rem', border: '1px solid var(--primary)', backgroundColor: 'transparent', color: 'var(--primary)', borderRadius: '0.3rem', cursor: 'pointer', fontSize: '0.8rem', transition: 'var(--transition)' }}
+                              onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--primary)'; e.currentTarget.style.color = 'white'; }}
+                              onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--primary)'; }}
+                              title="Descargar Reporte"
+                            >
+                              <Download size={14} /> PDF
+                            </button>
                           )}
                         </td>
                       </tr>

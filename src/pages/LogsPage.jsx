@@ -16,7 +16,7 @@ export default function LogsPage() {
     setLoading(true);
     setError('');
     try {
-      const res = await fetch(`http://127.0.0.1:8000/api/v1/admin/historial?tipo=${tipo}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/admin/historial?tipo=${tipo}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
