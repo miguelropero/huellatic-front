@@ -1,3 +1,4 @@
+import { fetchWithAuth } from '../utils/api';
 import React, { useState } from 'react';
 import { Edit, Save, X, GripVertical } from 'lucide-react';
 import {
@@ -199,7 +200,7 @@ export default function PreguntasTab({ secciones, setSecciones, onEditPregunta, 
     }
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/admin/cuestionario/preguntas/reordenar`, {
+      const res = await fetchWithAuth(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/admin/cuestionario/preguntas/reordenar`, {
         method: 'PUT',
         headers: { 
           'Content-Type': 'application/json',

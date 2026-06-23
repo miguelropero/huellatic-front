@@ -1,3 +1,4 @@
+import { fetchWithAuth } from '../utils/api';
 import { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { MoreVertical, Edit, BarChart, Users, Download, Plus, Search, X, Loader2 } from 'lucide-react';
@@ -36,7 +37,7 @@ export default function OrganizacionesPage() {
           ? `${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/admin/empresas?q=${encodeURIComponent(activeSearch)}`
           : `${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/admin/empresas`;
           
-        const response = await fetch(url);
+        const response = await fetchWithAuth(url);
         if (!response.ok) throw new Error('Error al obtener organizaciones');
         const data = await response.json();
         setEmpresas(data);
@@ -50,8 +51,8 @@ export default function OrganizacionesPage() {
   const fetchParametricas = async () => {
     try {
       const [resSectores, resCiudades] = await Promise.all([
-        fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/public/sectores`),
-        fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/public/ciudades`)
+        fetchWithAuth(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/public/sectores`),
+        fetchWithAuth(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/public/ciudades`)
       ]);
       if (resSectores.ok) setSectores(await resSectores.json());
       if (resCiudades.ok) setCiudades(await resCiudades.json());
@@ -100,7 +101,7 @@ export default function OrganizacionesPage() {
 
     try {
       setSubmitting(true);
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/admin/empresas`, {
+      const response = await fetchWithAuth(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/admin/empresas`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -158,7 +159,7 @@ export default function OrganizacionesPage() {
       try {
         const empresaName = empresas.find(e => e.id === id)?.nit || id;
         showSnackbar('Generando reporte corporativo...', 'success');
-        const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/admin/empresas/${id}/reporte-general`);
+        const res = await fetchWithAuth(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/admin/empresas/${id}/reporte-general`);
         if (!res.ok) {
           const errorData = await res.json().catch(() => ({}));
           throw new Error(errorData.detail || 'No se puede descargar el reporte corporativo por falta de datos.');

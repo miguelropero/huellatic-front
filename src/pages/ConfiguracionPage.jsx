@@ -1,4 +1,6 @@
+import { fetchWithAuth } from '../utils/api';
 import { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Edit, Save, X, Settings, Users, Building, Map, Sliders, List, HelpCircle, Plus, Trash2 } from 'lucide-react';
 import PreguntasTab from '../components/PreguntasTab';
 import SeccionesTab from '../components/SeccionesTab';
@@ -6,7 +8,14 @@ import VariablesTab from '../components/VariablesTab';
 import styles from '../styles/ConfiguracionPage.module.css';
 
 export default function ConfiguracionPage() {
-  const [activeTab, setActiveTab] = useState('usuarios');
+  const location = useLocation();
+  const navigate = useNavigate();
+  
+  const activeTab = location.hash ? location.hash.replace('#', '') : 'usuarios';
+
+  const setActiveTab = (tab) => {
+    navigate(`#${tab}`, { replace: true });
+  };
   const [secciones, setSecciones] = useState([]);
   const [sectores, setSectores] = useState([]);
   const [ciudades, setCiudades] = useState([]);
@@ -62,23 +71,23 @@ export default function ConfiguracionPage() {
 
     try {
       if (tab === 'preguntas' || tab === 'secciones') {
-        const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/admin/cuestionario`);
+        const res = await fetchWithAuth(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/admin/cuestionario`);
         if (!res.ok) throw new Error('Error al cargar cuestionario');
         setSecciones(await res.json());
       } else if (tab === 'sectores') {
-        const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/admin/sectores`);
+        const res = await fetchWithAuth(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/admin/sectores`);
         if (!res.ok) throw new Error('Error al cargar sectores');
         setSectores(await res.json());
       } else if (tab === 'ciudades') {
         const [resC, resD] = await Promise.all([
-          fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/admin/ciudades`),
-          fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/public/departamentos`)
+          fetchWithAuth(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/admin/ciudades`),
+          fetchWithAuth(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/public/departamentos`)
         ]);
         if (!resC.ok || !resD.ok) throw new Error('Error al cargar ciudades/departamentos');
         setCiudades(await resC.json());
         setDepartamentos(await resD.json());
       } else if (tab === 'variables') {
-        const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/admin/variables`);
+        const res = await fetchWithAuth(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/admin/variables`);
         if (!res.ok) throw new Error('Error al cargar variables');
         setVariables(await res.json());
       }
@@ -123,7 +132,7 @@ export default function ConfiguracionPage() {
 
   const savePregunta = async (preguntaId) => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/admin/cuestionario/preguntas/${preguntaId}`, {
+      const res = await fetchWithAuth(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/admin/cuestionario/preguntas/${preguntaId}`, {
         method: 'PUT',
         headers: { 
           'Content-Type': 'application/json',
@@ -157,7 +166,7 @@ export default function ConfiguracionPage() {
         
       const method = editingSectorId ? 'PUT' : 'POST';
       
-      const res = await fetch(url, {
+      const res = await fetchWithAuth(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(sectorForm)
@@ -175,7 +184,7 @@ export default function ConfiguracionPage() {
 
   const saveSeccion = async (id) => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/admin/cuestionario/secciones/${id}`, {
+      const res = await fetchWithAuth(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/admin/cuestionario/secciones/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(seccionForm)
@@ -193,7 +202,7 @@ export default function ConfiguracionPage() {
     
     setSyncing(true);
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/admin/sincronizar-divipola`, {
+      const res = await fetchWithAuth(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/admin/sincronizar-divipola`, {
         method: 'POST',
         headers: { 
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -214,7 +223,7 @@ export default function ConfiguracionPage() {
   const deleteSector = async (id) => {
     if (!window.confirm("¿Seguro que deseas eliminar este sector?")) return;
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/admin/sectores/${id}`, { method: 'DELETE' });
+      const res = await fetchWithAuth(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/admin/sectores/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Error al eliminar');
       fetchDataForTab('sectores', true);
     } catch(err) {

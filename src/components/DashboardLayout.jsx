@@ -1,5 +1,5 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Building2, BarChart3, Settings, FileText, LogOut } from 'lucide-react';
+import { LayoutDashboard, Building2, BarChart3, Settings, FileText, LogOut, Leaf } from 'lucide-react';
 import styles from '../styles/DashboardLayout.module.css';
 
 export default function DashboardLayout() {
@@ -15,7 +15,7 @@ export default function DashboardLayout() {
     <div className={styles.layoutContainer}>
       <aside className={styles.sidebar}>
         <div className={styles.logoContainer}>
-          <div className={styles.logoIcon}>HT</div>
+          <div className={styles.logoIcon}><Leaf size={20} /></div>
           <div className={styles.logoText}>HuellaTic</div>
         </div>
 

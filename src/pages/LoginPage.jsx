@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Leaf } from 'lucide-react';
 import styles from '../styles/LoginPage.module.css';
 
 export default function LoginPage() {
@@ -35,6 +36,7 @@ export default function LoginPage() {
       
       // Guardar sesión en LocalStorage (simulación básica de Contexto/Auth)
       localStorage.setItem('token', data.access_token);
+      localStorage.setItem('refresh_token', data.refresh_token);
       localStorage.setItem('rol', data.rol);
       
       if (data.rol === 'ROOT') {
@@ -55,7 +57,7 @@ export default function LoginPage() {
       {/* Panel Izquierdo: Información */}
       <div className={styles.infoPanel}>
         <div className={styles.logoContainer}>
-          <div className={styles.logoIcon}>HT</div>
+          <div className={styles.logoIcon}><Leaf size={28} /></div>
           <div className={styles.logoText}>HuellaTic</div>
         </div>
         

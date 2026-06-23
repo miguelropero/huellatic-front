@@ -1,6 +1,7 @@
+import { fetchWithAuth } from '../utils/api';
 import { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate, Link as RouterLink } from 'react-router-dom';
-import { Building, MapPin, Users, Target, ArrowLeft, Search, Copy, Check, Download, Loader2 } from 'lucide-react';
+import { Building, MapPin, Users, Target, ArrowLeft, Search, Copy, Check, Download, Loader2, ExternalLink } from 'lucide-react';
 import styles from '../styles/EmpresaDetallePage.module.css';
 
 export default function EmpresaDetallePage() {
@@ -21,13 +22,13 @@ export default function EmpresaDetallePage() {
     const fetchEmpresaDetalle = async () => {
       try {
         // Fetch empresa info
-        const resEmpresa = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/admin/empresas/${id}`);
+        const resEmpresa = await fetchWithAuth(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/admin/empresas/${id}`);
         if (!resEmpresa.ok) throw new Error('Empresa no encontrada');
         const dataEmpresa = await resEmpresa.json();
         setEmpresa(dataEmpresa);
 
         // Fetch empleados de la empresa
-        const resEmpleados = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/admin/empresas/${id}/empleados`);
+        const resEmpleados = await fetchWithAuth(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/admin/empresas/${id}/empleados`);
         if (resEmpleados.ok) {
           const dataEmpleados = await resEmpleados.json();
           setEmpleados(dataEmpleados);
@@ -71,7 +72,7 @@ export default function EmpresaDetallePage() {
   const handleDownloadPDF = async (empleadoId, cedula) => {
     setDownloadingPdfId(empleadoId);
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/public/empleado/${empleadoId}/reporte-pdf`);
+      const res = await fetchWithAuth(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/public/empleado/${empleadoId}/reporte-pdf`);
       if (!res.ok) throw new Error('Error al generar PDF');
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
@@ -94,7 +95,7 @@ export default function EmpresaDetallePage() {
     setIsDownloadingReporteGeneral(true);
     try {
       setSnackbar({ show: true, message: 'Generando reporte corporativo...', type: 'success' });
-      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/admin/empresas/${id}/reporte-general`);
+      const res = await fetchWithAuth(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/admin/empresas/${id}/reporte-general`);
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
         throw new Error(errorData.detail || 'No se puede descargar el reporte corporativo por falta de datos.');
@@ -118,7 +119,7 @@ export default function EmpresaDetallePage() {
 
   return (
     <div className={styles.pageContainer}>
-      <RouterLink to="/dashboard/organizaciones" className={`btn ${styles.backBtn}`}>
+      <RouterLink to="/dashboard/organizaciones" className={`btn ${styles.backBtn}`} style={{ textDecoration: 'none' }}>
         <ArrowLeft size={16} /> Volver a Organizaciones
       </RouterLink>
 
@@ -143,14 +144,14 @@ export default function EmpresaDetallePage() {
       <div className={styles.grid}>
         {/* Panel Información */}
         <div className={styles.card}>
-          <h2 className={styles.cardTitle}><Building size={18} /> Información General</h2>
+          <h2 className={styles.cardTitle}><Building size={18} /> Información general</h2>
           <ul className={styles.infoList}>
             <li className={styles.infoItem}>
               <span className={styles.infoLabel}>Sector</span>
               <span className={styles.infoValue}>{empresa.sector}</span>
             </li>
             <li className={styles.infoItem}>
-              <span className={styles.infoLabel}>Ciudad Principal</span>
+              <span className={styles.infoLabel}>Ciudad principal</span>
               <span className={styles.infoValue}>{empresa.ciudad}</span>
             </li>
             <li className={styles.infoItem}>
@@ -162,13 +163,13 @@ export default function EmpresaDetallePage() {
               <span className={styles.infoValue}>{empleados.length}</span>
             </li>
             <li className={styles.infoItem}>
-              <span className={styles.infoLabel}>Fecha de Registro</span>
+              <span className={styles.infoLabel}>Fecha de registro</span>
               <span className={styles.infoValue}>
                 {empresa.fecha_registro ? new Date(empresa.fecha_registro).toLocaleDateString() : 'N/A'}
               </span>
             </li>
             <li className={styles.infoItem} style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '0.5rem' }}>
-              <span className={styles.infoLabel}>Link Único de Registro para Empleados</span>
+              <span className={styles.infoLabel}>Link único de registro para empleados</span>
               <div style={{ display: 'flex', gap: '0.5rem', width: '100%' }}>
                 <input 
                   type="text" 
@@ -188,6 +189,15 @@ export default function EmpresaDetallePage() {
                 >
                   {copied ? <Check size={18} /> : <Copy size={18} />}
                 </button>
+                <a 
+                  href={`${window.location.origin}/registro/${empresa.enlace_unico}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ padding: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f1f5f9', color: 'var(--text-dark)', borderRadius: '0.5rem', border: '1px solid var(--border-color)', cursor: 'pointer', transition: 'var(--transition)', textDecoration: 'none' }}
+                  title="Abrir en pestaña nueva"
+                >
+                  <ExternalLink size={18} />
+                </a>
               </div>
             </li>
           </ul>
@@ -196,7 +206,7 @@ export default function EmpresaDetallePage() {
         {/* Panel Empleados (Preview) */}
         <div className={styles.card}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-            <h2 className={styles.cardTitle} style={{ marginBottom: 0 }}><Users size={18} /> Directorio de Empleados</h2>
+            <h2 className={styles.cardTitle} style={{ marginBottom: 0 }}><Users size={18} /> Directorio de empleados</h2>
             <div style={{ display: 'flex', alignItems: 'center', background: '#f8fafc', padding: '0.4rem 0.8rem', borderRadius: '0.5rem', border: '1px solid var(--border-color)' }}>
               <Search size={14} style={{ color: 'var(--text-muted)', marginRight: '0.5rem' }} />
               <input 
@@ -219,7 +229,7 @@ export default function EmpresaDetallePage() {
                     <th style={{ padding: '0.5rem', color: 'var(--text-muted)', fontSize: '0.85rem' }}>Nombre</th>
                     <th style={{ padding: '0.5rem', color: 'var(--text-muted)', fontSize: '0.85rem' }}>Cargo</th>
                     <th style={{ padding: '0.5rem', color: 'var(--text-muted)', fontSize: '0.85rem' }}>Cédula</th>
-                    <th style={{ padding: '0.5rem', color: 'var(--text-muted)', fontSize: '0.85rem' }}>Encuesta</th>
+                    <th style={{ padding: '0.5rem', color: 'var(--text-muted)', fontSize: '0.85rem', textAlign: 'center' }}>Encuesta</th>
                     <th style={{ padding: '0.5rem', color: 'var(--text-muted)', fontSize: '0.85rem' }}>Acciones</th>
                   </tr>
                 </thead>
@@ -234,15 +244,15 @@ export default function EmpresaDetallePage() {
                         <td style={{ padding: '0.75rem 0.5rem', fontWeight: '500' }}>{emp.nombre}</td>
                         <td style={{ padding: '0.75rem 0.5rem', fontSize: '0.9rem' }}>{emp.cargo}</td>
                         <td style={{ padding: '0.75rem 0.5rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>{emp.cedula}</td>
-                        <td style={{ padding: '0.75rem 0.5rem', fontSize: '0.9rem' }}>
-                          {emp.fecha_respuesta ? (
-                            <span style={{ color: 'green', background: '#dcfce7', padding: '0.2rem 0.5rem', borderRadius: '1rem', fontSize: '0.75rem' }}>Completada</span>
+                        <td style={{ padding: '0.75rem 0.5rem', fontSize: '0.9rem', textAlign: 'center', verticalAlign: 'middle' }}>
+                          {emp.estado_encuesta === 'COMPLETADO' ? (
+                            <div title="Completada" style={{ width: '16px', height: '16px', borderRadius: '50%', backgroundColor: '#10b981', display: 'inline-block', opacity: 0.85, marginTop: '4px' }}></div>
                           ) : (
-                            <span style={{ color: '#f59e0b', background: '#fef3c7', padding: '0.2rem 0.5rem', borderRadius: '1rem', fontSize: '0.75rem' }}>Pendiente</span>
+                            <div title="En Progreso" style={{ width: '16px', height: '16px', borderRadius: '50%', backgroundColor: '#f59e0b', display: 'inline-block', opacity: 0.85, marginTop: '4px' }}></div>
                           )}
                         </td>
                         <td style={{ padding: '0.75rem 0.5rem', fontSize: '0.9rem' }}>
-                          {emp.fecha_respuesta && (
+                          {emp.estado_encuesta === 'COMPLETADO' && (
                             <button 
                               className={styles.actionBtn} 
                               title="Descargar Reporte"

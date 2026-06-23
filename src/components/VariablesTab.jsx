@@ -1,3 +1,4 @@
+import { fetchWithAuth } from '../utils/api';
 import React, { useState, useEffect } from 'react';
 import { Edit, Trash2, Plus } from 'lucide-react';
 import styles from '../styles/ConfiguracionPage.module.css';
@@ -27,7 +28,7 @@ export default function VariablesTab({ showSnackbar }) {
   const fetchVariables = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`${API_URL}/api/v1/admin/variables`, {
+      const res = await fetchWithAuth(`${API_URL}/api/v1/admin/variables`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -86,7 +87,7 @@ export default function VariablesTab({ showSnackbar }) {
         valor_numerico: parseFloat(formData.valor_numerico)
       };
 
-      const res = await fetch(url, {
+      const res = await fetchWithAuth(url, {
         method,
         headers: {
           'Content-Type': 'application/json',
@@ -114,7 +115,7 @@ export default function VariablesTab({ showSnackbar }) {
     
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`${API_URL}/api/v1/admin/variables/${id}`, {
+      const res = await fetchWithAuth(`${API_URL}/api/v1/admin/variables/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`

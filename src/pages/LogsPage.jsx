@@ -1,3 +1,4 @@
+import { fetchWithAuth } from '../utils/api';
 import { useState, useEffect } from 'react';
 import { FileText, Map, List, HelpCircle } from 'lucide-react';
 import styles from '../styles/ConfiguracionPage.module.css'; // Reutilizamos estilos
@@ -16,7 +17,7 @@ export default function LogsPage() {
     setLoading(true);
     setError('');
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/admin/historial?tipo=${tipo}`, {
+      const res = await fetchWithAuth(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/admin/historial?tipo=${tipo}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
