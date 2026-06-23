@@ -81,7 +81,7 @@
   background: white;
   border-radius: 1rem;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-  overflow: hidden;
+  overflow: visible;
   border: 1px solid var(--border-color);
 }
 
@@ -100,6 +100,14 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   border-bottom: 1px solid var(--border-color);
+}
+
+.table th:first-child {
+  border-top-left-radius: 1rem;
+}
+
+.table th:last-child {
+  border-top-right-radius: 1rem;
 }
 
 .table td {

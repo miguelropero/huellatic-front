@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Edit, Save, X, Settings, Users, Building, Map, Sliders, List, HelpCircle, Plus, Trash2 } from 'lucide-react';
 import PreguntasTab from '../components/PreguntasTab';
 import SeccionesTab from '../components/SeccionesTab';
+import VariablesTab from '../components/VariablesTab';
 import styles from '../styles/ConfiguracionPage.module.css';
 
 export default function ConfiguracionPage() {
@@ -27,7 +28,7 @@ export default function ConfiguracionPage() {
   
   // Estado para edición de preguntas
   const [editingPreguntaId, setEditingPreguntaId] = useState(null);
-  const [editForm, setEditForm] = useState({ texto: '', tipo_respuesta: '', opciones: [] });
+  const [editForm, setEditForm] = useState({ texto: '', tipo_respuesta: '', identificador_calculo: '', opciones: [] });
 
   // Estado para CRUD de Sectores
   const [isSectorModalOpen, setIsSectorModalOpen] = useState(false);
@@ -95,6 +96,7 @@ export default function ConfiguracionPage() {
     setEditForm({ 
       texto: pregunta.texto, 
       tipo_respuesta: pregunta.tipo_respuesta,
+      identificador_calculo: pregunta.identificador_calculo || '',
       opciones: pregunta.opciones ? pregunta.opciones.map(opt => ({ texto: opt.texto, valor_calculo: opt.valor_calculo || '' })) : []
     });
   };
@@ -138,10 +140,10 @@ export default function ConfiguracionPage() {
       })));
       
       setEditingPreguntaId(null);
-      alert('Pregunta actualizada. El historial de cambios se ha guardado.');
+      showSnackbar('Pregunta actualizada. El historial de cambios se ha guardado.');
       fetchDataForTab('preguntas', true);
     } catch (err) {
-      alert(err.message);
+      showSnackbar('Error al actualizar: ' + err.message, 'error');
     }
   };
 
@@ -167,7 +169,7 @@ export default function ConfiguracionPage() {
       setEditingSectorId(null);
       fetchDataForTab('sectores', true); // Recargar datos de esta pestaña
     } catch(err) {
-      alert(err.message);
+      showSnackbar('Error al cargar datos: ' + err.message, 'error');
     }
   };
 
@@ -182,7 +184,7 @@ export default function ConfiguracionPage() {
       setEditingSeccionId(null);
       fetchDataForTab('secciones', true);
     } catch (err) {
-      alert(err.message);
+      showSnackbar('Error al cargar ciudades: ' + err.message, 'error');
     }
   };
 
@@ -200,10 +202,10 @@ export default function ConfiguracionPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || 'Error al sincronizar');
       
-      alert(data.mensaje);
+      showSnackbar(data.mensaje);
       fetchDataForTab('ciudades', true);
     } catch(err) {
-      alert(err.message);
+      showSnackbar('Error al crear sector: ' + err.message, 'error');
     } finally {
       setSyncing(false);
     }
@@ -216,7 +218,7 @@ export default function ConfiguracionPage() {
       if (!res.ok) throw new Error('Error al eliminar');
       fetchDataForTab('sectores', true);
     } catch(err) {
-      alert(err.message);
+      showSnackbar('Error al eliminar sector: ' + err.message, 'error');
     }
   };
 
@@ -353,22 +355,7 @@ export default function ConfiguracionPage() {
         );
 
       case 'variables':
-        return (
-          <div className={styles.tabContentBlock}>
-            <h2>Variables de Cálculo</h2>
-            <div className={styles.listContainer}>
-              {variables.map(v => (
-                <div key={v.id} className={styles.listItem}>
-                  <div>
-                    <strong>{v.nombre}</strong> <br/>
-                    <small>{v.descripcion}</small>
-                  </div>
-                  <span className={styles.badge}>{v.valor_numerico} {v.unidad_medida}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        );
+        return <VariablesTab showSnackbar={showSnackbar} />;
 
       case 'secciones':
         return (
@@ -497,6 +484,28 @@ export default function ConfiguracionPage() {
                 <option value="SELECCION_MULTIPLE">Selección Múltiple (Checkbox)</option>
                 <option value="ESCALA">Escala</option>
               </select>
+            </div>
+            
+            <div className={styles.formGroup} style={{ marginBottom: '1.5rem' }}>
+              <label className={styles.formLabel}>Identificador Matemático (Opcional)</label>
+              <select 
+                value={editForm.identificador_calculo || ''}
+                onChange={(e) => setEditForm({...editForm, identificador_calculo: e.target.value})}
+                className={styles.formInput}
+              >
+                <option value="">[Ninguno]</option>
+                <option value="distancia_km">Distancia Recorrida (Km)</option>
+                <option value="tiempo_recorrido_minutos">Tiempo de Recorrido por trayecto (Minutos)</option>
+                <option value="dias_teletrabajo">Días de Teletrabajo a la Semana</option>
+                <option value="dias_oficina">Días de Oficina a la Semana</option>
+                <option value="medio_transporte">Medio de Transporte Habitual</option>
+                <option value="costo_transporte">Costo del Transporte (Diario)</option>
+                <option value="costo_almuerzo">Costo del Almuerzo (Diario)</option>
+                <option value="consumo_energia">Consumo Mensual de Energía</option>
+              </select>
+              <small style={{ color: 'var(--text-muted)', marginTop: '0.5rem', display: 'block' }}>
+                Asigna una etiqueta para que el motor de cálculo sepa qué representa esta pregunta.
+              </small>
             </div>
             
             {['OPCION_MULTIPLE', 'SELECCION_MULTIPLE', 'ESCALA'].includes(editForm.tipo_respuesta) && (

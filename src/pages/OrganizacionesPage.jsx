@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { MoreVertical, Edit, BarChart, Users, Download, Plus, Search, X } from 'lucide-react';
+import { MoreVertical, Edit, BarChart, Users, Download, Plus, Search, X, Loader2 } from 'lucide-react';
 import styles from '../styles/OrganizacionesPage.module.css';
 
 export default function OrganizacionesPage() {
@@ -10,6 +10,7 @@ export default function OrganizacionesPage() {
   const [openDropdown, setOpenDropdown] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeSearch, setActiveSearch] = useState('');
+  const [generatingReportId, setGeneratingReportId] = useState(null);
   const dropdownRef = useRef(null);
 
   // Datos paramétricos
@@ -18,6 +19,12 @@ export default function OrganizacionesPage() {
 
   // Modal de Creación
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [snackbar, setSnackbar] = useState({ visible: false, message: '', type: 'success' });
+
+  const showSnackbar = (message, type = 'success') => {
+    setSnackbar({ visible: true, message, type });
+    setTimeout(() => setSnackbar(prev => ({ ...prev, visible: false })), 4000);
+  };
   const [formData, setFormData] = useState({ nombre: '', nit: '', sector: '', ciudad: '', total_empleados: '' });
   const [formErrors, setFormErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
@@ -114,9 +121,10 @@ export default function OrganizacionesPage() {
       setIsModalOpen(false);
       setFormData({ nombre: '', nit: '', sector: '', ciudad: '', total_empleados: '' });
       fetchEmpresas();
-      alert('Empresa creada exitosamente');
+      showSnackbar('Empresa creada exitosamente', 'success');
     } catch (err) {
       setFormErrors({ ...formErrors, global: err.message });
+      showSnackbar(err.message, 'error');
     } finally {
       setSubmitting(false);
     }
@@ -144,11 +152,38 @@ export default function OrganizacionesPage() {
     setOpenDropdown(openDropdown === id ? null : id);
   };
 
-  const handleAction = (action, id) => {
-    console.log(`Acción ${action} ejecutada para la empresa ${id}`);
-    setOpenDropdown(null);
-    // Aquí implementaremos la lógica real de navegación o ejecución después
-    alert(`Ejecutando acción: ${action} en empresa #${id}`);
+  const handleAction = async (action, id) => {
+    if (action === 'reporte') {
+      setGeneratingReportId(id);
+      try {
+        const empresaName = empresas.find(e => e.id === id)?.nit || id;
+        showSnackbar('Generando reporte corporativo...', 'success');
+        const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/admin/empresas/${id}/reporte-general`);
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => ({}));
+          throw new Error(errorData.detail || 'No se puede descargar el reporte corporativo por falta de datos.');
+        }
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Reporte_Organizacional_${empresaName}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        a.remove();
+        showSnackbar('Reporte corporativo descargado exitosamente', 'success');
+      } catch (err) {
+        showSnackbar(err.message, 'error');
+      } finally {
+        setGeneratingReportId(null);
+        setOpenDropdown(null);
+      }
+    } else {
+      setOpenDropdown(null);
+      console.log(`Acción ${action} ejecutada para la empresa ${id}`);
+      showSnackbar(`Ejecutando acción: ${action} en empresa #${id}`, 'success');
+    }
   };
 
   if (loading) return <div>Cargando organizaciones...</div>;
@@ -227,8 +262,14 @@ export default function OrganizacionesPage() {
                         <Users size={16} /> Gestionar Empleados
                       </button>
                       <div className={styles.dropdownDivider}></div>
-                      <button className={styles.dropdownItem} onClick={() => handleAction('reporte', empresa.id)}>
-                        <Download size={16} /> Descargar Reporte
+                      <button 
+                        className={styles.dropdownItem} 
+                        onClick={() => handleAction('reporte', empresa.id)}
+                        disabled={generatingReportId === empresa.id}
+                        style={{ opacity: generatingReportId === empresa.id ? 0.6 : 1, cursor: generatingReportId === empresa.id ? 'wait' : 'pointer' }}
+                      >
+                        {generatingReportId === empresa.id ? <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> : <Download size={16} />}
+                        {generatingReportId === empresa.id ? ' Generando...' : ' Descargar Reporte'}
                       </button>
                     </div>
                   )}
@@ -355,6 +396,13 @@ export default function OrganizacionesPage() {
               </div>
             </form>
           </div>
+        </div>
+      )}
+      {/* Snackbar */}
+      {snackbar.visible && (
+        <div className={`snackbar ${snackbar.type}`}>
+          {snackbar.message}
+          <button onClick={() => setSnackbar({ ...snackbar, visible: false })}>×</button>
         </div>
       )}
     </div>

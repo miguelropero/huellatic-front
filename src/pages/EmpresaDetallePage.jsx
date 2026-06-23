@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate, Link as RouterLink } from 'react-router-dom';
-import { Building, MapPin, Users, Target, ArrowLeft, Search, Copy, Check, Download } from 'lucide-react';
+import { Building, MapPin, Users, Target, ArrowLeft, Search, Copy, Check, Download, Loader2 } from 'lucide-react';
 import styles from '../styles/EmpresaDetallePage.module.css';
 
 export default function EmpresaDetallePage() {
@@ -13,6 +13,9 @@ export default function EmpresaDetallePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
+  const [snackbar, setSnackbar] = useState({ show: false, message: '', type: 'success' });
+  const [downloadingPdfId, setDownloadingPdfId] = useState(null);
+  const [isDownloadingReporteGeneral, setIsDownloadingReporteGeneral] = useState(false);
 
   useEffect(() => {
     const fetchEmpresaDetalle = async () => {
@@ -66,6 +69,7 @@ export default function EmpresaDetallePage() {
   const showReportButton = empleados.length > 0 && encuestasCompletadas > 0;
 
   const handleDownloadPDF = async (empleadoId, cedula) => {
+    setDownloadingPdfId(empleadoId);
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/public/empleado/${empleadoId}/reporte-pdf`);
       if (!res.ok) throw new Error('Error al generar PDF');
@@ -78,8 +82,37 @@ export default function EmpresaDetallePage() {
       a.click();
       window.URL.revokeObjectURL(url);
       a.remove();
+      setSnackbar({ show: true, message: 'Reporte descargado exitosamente', type: 'success' });
     } catch (err) {
-      alert("Hubo un error al descargar el reporte: " + err.message);
+      setSnackbar({ show: true, message: "Hubo un error al descargar el reporte: " + err.message, type: 'error' });
+    } finally {
+      setDownloadingPdfId(null);
+    }
+  };
+
+  const handleDownloadReporteGeneral = async () => {
+    setIsDownloadingReporteGeneral(true);
+    try {
+      setSnackbar({ show: true, message: 'Generando reporte corporativo...', type: 'success' });
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/admin/empresas/${id}/reporte-general`);
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.detail || 'No se puede descargar el reporte corporativo por falta de datos.');
+      }
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Reporte_Organizacional_${empresa.nit}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      a.remove();
+      setSnackbar({ show: true, message: 'Reporte corporativo descargado exitosamente', type: 'success' });
+    } catch (err) {
+      setSnackbar({ show: true, message: err.message, type: 'error' });
+    } finally {
+      setIsDownloadingReporteGeneral(false);
     }
   };
 
@@ -95,8 +128,13 @@ export default function EmpresaDetallePage() {
           <p className={styles.subtitle}>NIT: {empresa.nit}</p>
         </div>
         {showReportButton && (
-          <button className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Download size={18} />
+          <button 
+            className="btn btn-primary" 
+            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: isDownloadingReporteGeneral ? 0.7 : 1, cursor: isDownloadingReporteGeneral ? 'wait' : 'pointer' }} 
+            onClick={handleDownloadReporteGeneral}
+            disabled={isDownloadingReporteGeneral}
+          >
+            {isDownloadingReporteGeneral ? <Loader2 size={18} className={styles.spinner} /> : <Download size={18} />}
             Reporte General
           </button>
         )}
@@ -206,13 +244,17 @@ export default function EmpresaDetallePage() {
                         <td style={{ padding: '0.75rem 0.5rem', fontSize: '0.9rem' }}>
                           {emp.fecha_respuesta && (
                             <button 
-                              onClick={() => handleDownloadPDF(emp.id, emp.cedula)}
-                              style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', padding: '0.4rem 0.6rem', border: '1px solid var(--primary)', backgroundColor: 'transparent', color: 'var(--primary)', borderRadius: '0.3rem', cursor: 'pointer', fontSize: '0.8rem', transition: 'var(--transition)' }}
-                              onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'var(--primary)'; e.currentTarget.style.color = 'white'; }}
-                              onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--primary)'; }}
+                              className={styles.actionBtn} 
                               title="Descargar Reporte"
+                              onClick={() => handleDownloadPDF(emp.id, emp.cedula)}
+                              disabled={downloadingPdfId === emp.id}
+                              style={{ 
+                                display: 'flex', alignItems: 'center', gap: '0.3rem', padding: '0.4rem 0.6rem', border: '1px solid var(--primary)', backgroundColor: 'transparent', color: 'var(--primary)', borderRadius: '0.3rem', cursor: downloadingPdfId === emp.id ? 'wait' : 'pointer', fontSize: '0.8rem', transition: 'var(--transition)', opacity: downloadingPdfId === emp.id ? 0.5 : 1
+                              }}
+                              onMouseEnter={(e) => { if (downloadingPdfId !== emp.id) { e.currentTarget.style.backgroundColor = 'var(--primary)'; e.currentTarget.style.color = 'white'; }}}
+                              onMouseLeave={(e) => { if (downloadingPdfId !== emp.id) { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = 'var(--primary)'; }}}
                             >
-                              <Download size={14} /> PDF
+                              {downloadingPdfId === emp.id ? <><Loader2 size={14} className={styles.spinner} /> PDF</> : <><Download size={14} /> PDF</>}
                             </button>
                           )}
                         </td>
@@ -236,6 +278,13 @@ export default function EmpresaDetallePage() {
           )}
         </div>
       </div>
+      
+      {snackbar.show && (
+        <div className={`snackbar ${snackbar.type}`}>
+          {snackbar.message}
+          <button onClick={() => setSnackbar({ show: false, message: '', type: 'success' })}>×</button>
+        </div>
+      )}
     </div>
   );
 }

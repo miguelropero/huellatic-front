@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Leaf, User, Briefcase, MapPin, CheckCircle } from 'lucide-react';
+import { Building, ArrowLeft, CheckCircle, Search, Copy, Check, Loader2, Leaf, User, Briefcase, MapPin } from 'lucide-react';
 import styles from '../styles/RegistroEmpleadoPage.module.css';
 
 export default function RegistroEmpleadoPage() {
@@ -13,6 +13,8 @@ export default function RegistroEmpleadoPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [empleadoId, setEmpleadoId] = useState(null);
+  const [snackbar, setSnackbar] = useState({ show: false, message: '', type: 'success' });
+  const [isDownloading, setIsDownloading] = useState(false);
 
   // Wizard State
   const [currentStep, setCurrentStep] = useState(1);
@@ -198,6 +200,7 @@ export default function RegistroEmpleadoPage() {
   }
 
   const handleDownloadPDF = async () => {
+    setIsDownloading(true);
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/api/v1/public/empleado/${empleadoId}/reporte-pdf`);
       if (!res.ok) throw new Error('Error al generar PDF');
@@ -210,8 +213,11 @@ export default function RegistroEmpleadoPage() {
       a.click();
       window.URL.revokeObjectURL(url);
       a.remove();
+      setSnackbar({ show: true, message: 'Reporte descargado exitosamente', type: 'success' });
     } catch (err) {
-      alert("Hubo un error al descargar el reporte: " + err.message);
+      setSnackbar({ show: true, message: "Hubo un error al descargar el reporte: " + err.message, type: 'error' });
+    } finally {
+      setIsDownloading(false);
     }
   };
 
@@ -222,10 +228,22 @@ export default function RegistroEmpleadoPage() {
           <CheckCircle size={60} className={styles.successIcon} />
           <h2>¡Registro Completado!</h2>
           <p style={{marginBottom: '2rem'}}>Tus datos han sido guardados exitosamente. Tu huella de carbono ha sido calculada.</p>
-          <button className={`btn btn-primary`} style={{width: '100%', padding: '1rem', fontSize: '1.1rem'}} onClick={handleDownloadPDF}>
-            Descargar Reporte PDF
+          <button 
+            className={`btn btn-primary`} 
+            style={{width: '100%', padding: '1rem', fontSize: '1.1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem'}} 
+            onClick={handleDownloadPDF}
+            disabled={isDownloading}
+          >
+            {isDownloading ? <Loader2 size={20} className={styles.spinner} /> : 'Descargar Reporte PDF'}
           </button>
         </div>
+        
+        {snackbar.show && (
+          <div className={`snackbar ${snackbar.type}`}>
+            {snackbar.message}
+            <button onClick={() => setSnackbar({ show: false, message: '', type: 'success' })}>×</button>
+          </div>
+        )}
       </div>
     );
   }

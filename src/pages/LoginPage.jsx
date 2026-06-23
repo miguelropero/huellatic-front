@@ -8,6 +8,12 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [snackbar, setSnackbar] = useState({ visible: false, message: '', type: 'success' });
+
+  const showSnackbar = (message, type = 'success') => {
+    setSnackbar({ visible: true, message, type });
+    setTimeout(() => setSnackbar(prev => ({ ...prev, visible: false })), 4000);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -34,7 +40,7 @@ export default function LoginPage() {
       if (data.rol === 'ROOT') {
         navigate('/dashboard');
       } else {
-        alert('¡Bienvenido! Pronto verás el panel de tu empresa.');
+        showSnackbar('¡Bienvenido! Pronto verás el panel de tu empresa.', 'success');
       }
       
     } catch (err) {
@@ -120,6 +126,27 @@ export default function LoginPage() {
           </form>
         </div>
       </div>
+      {/* Snackbar */}
+      {snackbar.visible && (
+        <div style={{
+          position: 'fixed',
+          bottom: '2rem',
+          right: '2rem',
+          backgroundColor: snackbar.type === 'error' ? '#ef4444' : '#10b981',
+          color: 'white',
+          padding: '1rem 2rem',
+          borderRadius: '0.5rem',
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+          zIndex: 9999,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '1rem',
+          animation: 'slideUp 0.3s ease-out'
+        }}>
+          {snackbar.message}
+          <button onClick={() => setSnackbar({ ...snackbar, visible: false })} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', fontSize: '1.2rem' }}>×</button>
+        </div>
+      )}
     </div>
   );
 }
