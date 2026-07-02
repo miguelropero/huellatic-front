@@ -4,6 +4,7 @@ import styles from '../styles/DashboardLayout.module.css';
 
 export default function DashboardLayout() {
   const navigate = useNavigate();
+  const rol = localStorage.getItem('rol');
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -45,21 +46,25 @@ export default function DashboardLayout() {
             Reportes
           </NavLink>
           
-          <NavLink 
-            to="/dashboard/configuracion" 
-            className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}
-          >
-            <Settings size={20} />
-            Configuración
-          </NavLink>
+          {rol === 'ROOT' && (
+            <>
+              <NavLink 
+                to="/dashboard/configuracion" 
+                className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}
+              >
+                <Settings size={20} />
+                Configuración
+              </NavLink>
 
-          <NavLink 
-            to="/dashboard/logs" 
-            className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}
-          >
-            <FileText size={20} />
-            Logs
-          </NavLink>
+              <NavLink 
+                to="/dashboard/logs" 
+                className={({ isActive }) => isActive ? `${styles.navItem} ${styles.active}` : styles.navItem}
+              >
+                <FileText size={20} />
+                Logs
+              </NavLink>
+            </>
+          )}
         </nav>
 
         <div className={styles.footer}>

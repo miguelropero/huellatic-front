@@ -13,6 +13,13 @@ export default function ConfiguracionPage() {
   
   const activeTab = location.hash ? location.hash.replace('#', '') : 'usuarios';
 
+  useEffect(() => {
+    const rol = localStorage.getItem('rol');
+    if (rol !== 'ROOT') {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [navigate]);
+
   const setActiveTab = (tab) => {
     navigate(`#${tab}`, { replace: true });
   };

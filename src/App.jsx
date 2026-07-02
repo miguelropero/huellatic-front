@@ -1,5 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
+import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
+import RegistroEmpresaPage from './pages/RegistroEmpresaPage'
 import DashboardLayout from './components/DashboardLayout'
 import DashboardPage from './pages/DashboardPage'
 import OrganizacionesPage from './pages/OrganizacionesPage'
@@ -13,6 +15,7 @@ function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/registro-empresa" element={<RegistroEmpresaPage />} />
       <Route path="/registro/:token" element={<RegistroEmpleadoPage />} />
       
       {/* Rutas protegidas del Dashboard usando el Layout */}
@@ -25,7 +28,7 @@ function App() {
         <Route path="logs" element={<LogsPage />} />
       </Route>
 
-      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="/" element={<HomePage />} />
     </Routes>
   )
 }

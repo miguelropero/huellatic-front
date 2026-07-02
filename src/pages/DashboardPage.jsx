@@ -9,13 +9,14 @@ export default function DashboardPage() {
   const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  
+  const rol = localStorage.getItem('rol');
 
   useEffect(() => {
     // Verificar sesión básica
     const token = localStorage.getItem('token');
-    const rol = localStorage.getItem('rol');
     
-    if (!token || rol !== 'ROOT') {
+    if (!token || (rol !== 'ROOT' && rol !== 'EMPRESA')) {
       navigate('/login');
       return;
     }
@@ -75,28 +76,28 @@ export default function DashboardPage() {
       {/* Gráficas */}
       <div className={styles.chartsGrid}>
         <div className={styles.chartCard}>
-          <h3 className={styles.chartTitle}>Crecimiento de Empresas (2026)</h3>
+          <h3 className={styles.chartTitle}>{rol === 'ROOT' ? 'Crecimiento de Empresas (2026)' : 'Registro de Empleados (2026)'}</h3>
           <div className={styles.chartWrapper}>
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={data.empresas_timeline}>
+              <LineChart data={data.timeline || data.empresas_timeline || []}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                 <XAxis dataKey="name" axisLine={false} tickLine={false} />
                 <YAxis axisLine={false} tickLine={false} />
                 <Tooltip 
                   contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}
                 />
-                <Line type="monotone" dataKey="empresas" stroke="var(--primary)" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
+                <Line type="monotone" dataKey="valor" stroke="var(--primary)" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
               </LineChart>
             </ResponsiveContainer>
           </div>
         </div>
 
         <div className={styles.chartCard}>
-          <h3 className={styles.chartTitle}>Top 10 Empresas por Empleados</h3>
+          <h3 className={styles.chartTitle}>{rol === 'ROOT' ? 'Top 10 Empresas por Empleados' : 'Distribución de Personal por Cargo'}</h3>
           <div className={styles.chartWrapper}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart 
-                data={[...data.empleados_por_empresa].filter(e => e.value > 0).sort((a, b) => b.value - a.value).slice(0, 10)} 
+                data={[...(data.distribucion || data.empleados_por_empresa || [])].filter(e => e.value > 0).sort((a, b) => b.value - a.value).slice(0, 10)} 
                 margin={{ bottom: 70 }}
               >
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />

@@ -4,107 +4,6 @@
   width: 100%;
 }
 
-/* Panel Izquierdo: Información */
-.infoPanel {
-  flex: 1;
-  background: linear-gradient(135deg, var(--bg-dark) 0%, #1e293b 100%);
-  color: var(--text-light);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 4rem;
-  position: relative;
-  overflow: hidden;
-}
-
-/* Efecto de decoración en el fondo */
-.infoPanel::before {
-  content: '';
-  position: absolute;
-  top: -20%;
-  left: -10%;
-  width: 500px;
-  height: 500px;
-  background: radial-gradient(circle, rgba(37,99,235,0.15) 0%, rgba(0,0,0,0) 70%);
-  border-radius: 50%;
-}
-
-.infoPanel::after {
-  content: '';
-  position: absolute;
-  bottom: -10%;
-  right: -10%;
-  width: 600px;
-  height: 600px;
-  background: radial-gradient(circle, rgba(16,185,129,0.1) 0%, rgba(0,0,0,0) 70%);
-  border-radius: 50%;
-}
-
-.logoContainer {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 3rem;
-  z-index: 1;
-}
-
-.logoIcon {
-  width: 48px;
-  height: 48px;
-  background: var(--secondary);
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  font-size: 1.5rem;
-  color: white;
-  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
-}
-
-.logoText {
-  font-size: 2rem;
-  font-weight: 700;
-  letter-spacing: -0.5px;
-}
-
-.infoContent {
-  z-index: 1;
-  max-width: 480px;
-}
-
-.infoTitle {
-  font-size: 2.5rem;
-  font-weight: 700;
-  margin-bottom: 1.5rem;
-  line-height: 1.2;
-}
-
-.infoDescription {
-  font-size: 1.1rem;
-  line-height: 1.6;
-  color: #cbd5e1;
-  margin-bottom: 2rem;
-}
-
-.featuresList {
-  list-style: none;
-  margin-top: 2rem;
-}
-
-.featureItem {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 1rem;
-  font-size: 1.05rem;
-  color: #f1f5f9;
-}
-
-.featureIcon {
-  color: var(--secondary);
-}
-
 /* Panel Derecho: Formulario */
 .formPanel {
   flex: 1;
@@ -181,11 +80,6 @@
 @media (max-width: 900px) {
   .loginContainer {
     flex-direction: column;
-  }
-  
-  .infoPanel {
-    padding: 3rem 2rem;
-    min-height: 40vh;
   }
   
   .formPanel {

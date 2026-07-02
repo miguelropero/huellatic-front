@@ -39,10 +39,10 @@ export default function LoginPage() {
       localStorage.setItem('refresh_token', data.refresh_token);
       localStorage.setItem('rol', data.rol);
       
-      if (data.rol === 'ROOT') {
+      if (data.rol === 'ROOT' || data.rol === 'EMPRESA') {
         navigate('/dashboard');
       } else {
-        showSnackbar('¡Bienvenido! Pronto verás el panel de tu empresa.', 'success');
+        navigate('/dashboard'); // Temporarily redirect all to dashboard
       }
       
     } catch (err) {
@@ -54,40 +54,12 @@ export default function LoginPage() {
 
   return (
     <div className={styles.loginContainer}>
-      {/* Panel Izquierdo: Información */}
-      <div className={styles.infoPanel}>
-        <div className={styles.logoContainer}>
-          <div className={styles.logoIcon}><Leaf size={28} /></div>
-          <div className={styles.logoText}>HuellaTic</div>
-        </div>
-        
-        <div className={styles.infoContent}>
-          <h1 className={styles.infoTitle}>Mide y reduce tu impacto ambiental.</h1>
-          <p className={styles.infoDescription}>
-            HuellaTic es la plataforma corporativa del Ministerio TIC para calcular, analizar y compensar la huella de carbono generada por las actividades tecnológicas y operativas de tu empresa.
-          </p>
-          
-          <ul className={styles.featuresList}>
-            <li className={styles.featureItem}>
-              <span className={styles.featureIcon}>✓</span>
-              Cálculo automatizado de emisiones
-            </li>
-            <li className={styles.featureItem}>
-              <span className={styles.featureIcon}>✓</span>
-              Reportes detallados por empleado
-            </li>
-            <li className={styles.featureItem}>
-              <span className={styles.featureIcon}>✓</span>
-              Dashboard global de sostenibilidad
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      {/* Panel Derecho: Formulario */}
       <div className={styles.formPanel}>
         <div className={styles.formCard}>
           <div className={styles.formHeader}>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+              <div className={styles.logoIcon}><Leaf size={28} /></div>
+            </div>
             <h2 className={styles.formTitle}>Iniciar Sesión</h2>
             <p className={styles.formSubtitle}>Ingresa tus credenciales de administrador</p>
           </div>
@@ -125,6 +97,12 @@ export default function LoginPage() {
             <button type="submit" className={`btn btn-primary ${styles.submitBtn}`} disabled={isLoading}>
               {isLoading ? 'Iniciando...' : 'Entrar a HuellaTic'}
             </button>
+            
+            <div style={{ marginTop: '1.5rem', textAlign: 'center', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+              ¿No tienes una cuenta? <a href="/registro-empresa" style={{ color: 'var(--primary)', textDecoration: 'none', fontWeight: '500' }}>Registra tu empresa</a>
+              <br /><br />
+              <a href="/" style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>Volver al inicio</a>
+            </div>
           </form>
         </div>
       </div>

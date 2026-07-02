@@ -431,7 +431,7 @@ export default function RegistroEmpleadoPage() {
               <div style={{ marginBottom: '1.5rem' }}>
                 <h3 style={{ color: 'var(--text-dark)', fontSize: '1.5rem', marginBottom: '0.2rem' }}>Bienvenido</h3>
                 <h2 style={{ color: '#64748b', fontSize: '1.1rem', marginBottom: '1rem', fontWeight: '500' }}>Cuestionario de {empresaNombre}</h2>
-                <p>Por favor ingresa tu número de cédula para iniciar la encuesta o retomar tu progreso guardado.</p>
+                <p>Por favor ingresa tu número de cédula para iniciar la encuesta, retomar tu progreso, o <strong>descargar tu reporte de huella de carbono</strong> si ya la completaste anteriormente.</p>
               </div>
               
               <div className={styles.formGroup}>
@@ -456,7 +456,7 @@ export default function RegistroEmpleadoPage() {
               
               <div className={styles.formActions} style={{ justifyContent: 'center', marginTop: '2rem' }}>
                 <button type="submit" className={`btn btn-primary ${styles.submitBtn}`} disabled={submitting}>
-                  {submitting ? 'Verificando...' : 'Continuar'}
+                  {submitting ? 'Verificando...' : 'Continuar / Descargar'}
                 </button>
               </div>
             </form>

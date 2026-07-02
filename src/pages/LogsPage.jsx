@@ -1,17 +1,24 @@
 import { fetchWithAuth } from '../utils/api';
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FileText, Map, List, HelpCircle } from 'lucide-react';
 import styles from '../styles/ConfiguracionPage.module.css'; // Reutilizamos estilos
 
 export default function LogsPage() {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('ciudades');
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
+    const rol = localStorage.getItem('rol');
+    if (rol !== 'ROOT') {
+      navigate('/dashboard', { replace: true });
+      return;
+    }
     fetchLogs(activeTab);
-  }, [activeTab]);
+  }, [activeTab, navigate]);
 
   const fetchLogs = async (tipo) => {
     setLoading(true);
