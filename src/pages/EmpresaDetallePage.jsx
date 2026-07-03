@@ -1,7 +1,7 @@
 import { fetchWithAuth } from '../utils/api';
 import { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate, Link as RouterLink } from 'react-router-dom';
-import { Building, MapPin, Users, Target, ArrowLeft, Search, Copy, Check, Download, Loader2, ExternalLink } from 'lucide-react';
+import { Building, MapPin, Users, Target, ArrowLeft, Search, Copy, Check, Download, Loader2, ExternalLink, BarChart2 } from 'lucide-react';
 import styles from '../styles/EmpresaDetallePage.module.css';
 
 export default function EmpresaDetallePage() {
@@ -128,17 +128,28 @@ export default function EmpresaDetallePage() {
           <h1 className={styles.title}>{empresa.nombre}</h1>
           <p className={styles.subtitle}>NIT: {empresa.nit}</p>
         </div>
-        {showReportButton && (
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
           <button 
-            className="btn btn-primary" 
-            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: isDownloadingReporteGeneral ? 0.7 : 1, cursor: isDownloadingReporteGeneral ? 'wait' : 'pointer' }} 
-            onClick={handleDownloadReporteGeneral}
-            disabled={isDownloadingReporteGeneral}
+            className="btn" 
+            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', backgroundColor: 'white', color: 'var(--primary)', border: '1px solid var(--primary)' }} 
+            onClick={() => navigate('/dashboard/reportes', { state: { preselectEmpresaId: empresa.id } })}
           >
-            {isDownloadingReporteGeneral ? <Loader2 size={18} className={styles.spinner} /> : <Download size={18} />}
-            Reporte General
+            <BarChart2 size={18} />
+            Ver en Reportes
           </button>
-        )}
+          
+          {showReportButton && (
+            <button 
+              className="btn btn-primary" 
+              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: isDownloadingReporteGeneral ? 0.7 : 1, cursor: isDownloadingReporteGeneral ? 'wait' : 'pointer' }} 
+              onClick={handleDownloadReporteGeneral}
+              disabled={isDownloadingReporteGeneral}
+            >
+              {isDownloadingReporteGeneral ? <Loader2 size={18} className={styles.spinner} /> : <Download size={18} />}
+              Reporte General
+            </button>
+          )}
+        </div>
       </div>
 
       <div className={styles.grid}>

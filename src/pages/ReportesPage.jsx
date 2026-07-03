@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { fetchWithAuth } from '../utils/api';
-import { Download, FileText, Droplets, Zap, Building, Briefcase, Users, CheckCircle, Leaf, Clock, Coins, Copy, Check } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
+import { Download, FileText, Droplets, Zap, Building, Briefcase, Users, CheckCircle, Leaf, Clock, Coins, Copy, Check, ChevronDown, Search } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import styles from '../styles/DashboardPage.module.css';
 
@@ -12,6 +13,16 @@ export default function ReportesPage() {
   const [loadingMetricas, setLoadingMetricas] = useState(false);
   const [error, setError] = useState('');
   const [isCopied, setIsCopied] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [empresaSearch, setEmpresaSearch] = useState('');
+  
+  const location = useLocation();
+  const preselectEmpresaId = location.state?.preselectEmpresaId;
+
+  const empresasFiltradas = empresas.filter(emp => 
+    emp.nombre.toLowerCase().includes(empresaSearch.toLowerCase()) || 
+    emp.nit.includes(empresaSearch)
+  );
 
   useEffect(() => {
     fetchEmpresas();
@@ -31,7 +42,11 @@ export default function ReportesPage() {
       if (!response.ok) throw new Error('Error al cargar empresas');
       const data = await response.json();
       setEmpresas(data);
-      if (data.length === 1) {
+      if (preselectEmpresaId) {
+        setSelectedEmpresa(preselectEmpresaId.toString());
+        const preEmp = data.find(e => e.id.toString() === preselectEmpresaId.toString());
+        if (preEmp) setEmpresaSearch(`${preEmp.nombre} (NIT: ${preEmp.nit})`);
+      } else if (data.length === 1) {
         setSelectedEmpresa(data[0].id.toString());
       }
     } catch (err) {
@@ -93,17 +108,93 @@ export default function ReportesPage() {
         <h1 className={styles.title} style={{ margin: 0 }}>Reportes</h1>
         
         {empresas.length > 1 && (
-          <select 
-            className="input-field" 
-            style={{ width: '300px', margin: 0 }}
-            value={selectedEmpresa}
-            onChange={(e) => setSelectedEmpresa(e.target.value)}
-          >
-            <option value="">-- Selecciona una empresa --</option>
-            {empresas.map(emp => (
-              <option key={emp.id} value={emp.id}>{emp.nombre} (NIT: {emp.nit})</option>
-            ))}
-          </select>
+          <div style={{ position: 'relative', width: '350px' }}>
+            <div 
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                backgroundColor: 'white',
+                border: '1px solid var(--border-color)',
+                borderRadius: '0.5rem',
+                padding: '0.5rem 1rem',
+                cursor: 'pointer',
+                boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+              }}
+              onClick={() => setShowDropdown(!showDropdown)}
+            >
+              <Search size={18} style={{ color: 'var(--text-muted)', marginRight: '0.5rem' }} />
+              <input 
+                type="text"
+                placeholder="Buscar empresa por nombre o NIT..."
+                value={empresaSearch}
+                onChange={(e) => {
+                  setEmpresaSearch(e.target.value);
+                  setShowDropdown(true);
+                  if (e.target.value === '') {
+                    setSelectedEmpresa('');
+                  }
+                }}
+                onFocus={() => setShowDropdown(true)}
+                style={{
+                  border: 'none',
+                  outline: 'none',
+                  width: '100%',
+                  fontSize: '0.95rem',
+                  color: 'var(--text-dark)',
+                  backgroundColor: 'transparent'
+                }}
+              />
+              <ChevronDown size={18} style={{ color: 'var(--text-muted)', marginLeft: '0.5rem' }} />
+            </div>
+
+            {showDropdown && (
+              <ul style={{
+                position: 'absolute',
+                top: '100%',
+                left: 0,
+                right: 0,
+                maxHeight: '300px',
+                overflowY: 'auto',
+                backgroundColor: 'white',
+                border: '1px solid var(--border-color)',
+                borderRadius: '0.5rem',
+                marginTop: '4px',
+                zIndex: 50,
+                listStyle: 'none',
+                padding: 0,
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+              }}>
+                {empresasFiltradas.length > 0 ? empresasFiltradas.map(emp => (
+                  <li 
+                    key={emp.id} 
+                    onClick={() => {
+                      setSelectedEmpresa(emp.id);
+                      setEmpresaSearch(`${emp.nombre} (NIT: ${emp.nit})`);
+                      setShowDropdown(false);
+                    }}
+                    style={{
+                      padding: '0.75rem 1rem',
+                      cursor: 'pointer',
+                      color: 'var(--text-dark)',
+                      borderBottom: '1px solid #f1f5f9',
+                      backgroundColor: selectedEmpresa === emp.id ? '#f8fafc' : 'white',
+                      fontWeight: selectedEmpresa === emp.id ? '500' : 'normal'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (selectedEmpresa !== emp.id) e.target.style.backgroundColor = '#f8fafc';
+                    }}
+                    onMouseLeave={(e) => {
+                      if (selectedEmpresa !== emp.id) e.target.style.backgroundColor = 'white';
+                    }}
+                  >
+                    {emp.nombre} <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>(NIT: {emp.nit})</span>
+                  </li>
+                )) : (
+                  <li style={{ padding: '1rem', color: 'var(--text-muted)', textAlign: 'center' }}>No se encontraron empresas</li>
+                )}
+              </ul>
+            )}
+          </div>
         )}
       </div>
 
@@ -157,7 +248,7 @@ export default function ReportesPage() {
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '2rem' }}>
             <button onClick={handleDownload} className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <Download size={18} />
-              Descargar Reporte Completo (PDF)
+              Descargar Reporte PDF
             </button>
           </div>
 
