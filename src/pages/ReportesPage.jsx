@@ -120,7 +120,11 @@ export default function ReportesPage() {
                 cursor: 'pointer',
                 boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
               }}
-              onClick={() => setShowDropdown(!showDropdown)}
+              onClick={() => {
+                setShowDropdown(true);
+                // Optionally focus the input if they click the wrapper
+                document.getElementById('empresa-search-input')?.focus();
+              }}
             >
               <Search size={18} style={{ color: 'var(--text-muted)', marginRight: '0.5rem' }} />
               <input 
@@ -135,6 +139,8 @@ export default function ReportesPage() {
                   }
                 }}
                 onFocus={() => setShowDropdown(true)}
+                onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
+                id="empresa-search-input"
                 style={{
                   border: 'none',
                   outline: 'none',
